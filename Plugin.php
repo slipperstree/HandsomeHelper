@@ -39,6 +39,8 @@
 
 class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
 
+    public static $themeOptions = NULL;
+
     /**
 	 * 索引ID
 	 */
@@ -55,8 +57,9 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      */
     public static function activate()
     {
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('SeriesIndex_Plugin', 'contentEx');
-        //Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('SeriesIndex_Plugin', 'excerptEx');
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('HandsomeHelper_Plugin', 'contentEx');
+        self::$themeOptions = Helper::options();
+        //Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('HandsomeHelper_Plugin', 'excerptEx');
     }
     
     /**
@@ -86,6 +89,30 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function personalConfig(Typecho_Widget_Helper_Form $form){}
+
+    /**
+     * 获取指定文章的自定义field设置内容
+     * 
+     * @access public
+     * @param $cid 文章cid
+     * @param $key 自定义字段名
+     * @return void
+     */
+    public static function getCustomOption($cid, $key){
+        $db = Typecho_Db::get();
+        $rows = $db->fetchAll($db->select('table.fields.str_value')->from('table.fields')
+            ->where('table.fields.cid = ?', $cid)
+            ->where('table.fields.name = ?', $key)
+        );
+        // 如果有多个值则存入数组
+        foreach ($rows as $row) {
+            $img = $row['str_value'];
+            if (!empty($img)) {
+                $values[] = $img;
+            }
+        }
+        return $values;
+    }
 
     /**
      * 列表页忽略目录生成标记
@@ -135,10 +162,10 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
 				return $html;
 			}
 			
-			$seriesIndexHtml = "<div style='padding-left:10px; padding-top:10px; padding-bottom:10px; border:0px solid blue; background:#EDEFED; border-left:3px solid #D2D7D2;'>";
-			//$seriesIndexHtml = "<div style='border:0px solid blue;background:#EDEFED;'>";
-			$seriesIndexHtml .= "<h3>系列文章</h3>";
-			$seriesIndexHtml .= "<ul>";
+			$HandsomeHelperHtml = "<div style='padding-left:10px; padding-top:10px; padding-bottom:10px; border:0px solid blue; background:#EDEFED; border-left:3px solid #D2D7D2;'>";
+			//$HandsomeHelperHtml = "<div style='border:0px solid blue;background:#EDEFED;'>";
+			$HandsomeHelperHtml .= "<h3>系列文章</h3>";
+			$HandsomeHelperHtml .= "<ul>";
 			foreach ($seriesContents as $seriesContent) {
 				// TODO 取到以后拼接出url，并用上面取出的文字作为链接文字
 				$url = self::getURL($seriesContent, $widget);
@@ -146,21 +173,21 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
 
 				if ($seriesContent['slug'] == $slug) {
 					// 当前文章不加link
-					$seriesIndexHtml .= "<li><b>" . $seriesContent['title'] . "</b>【当前文章】</li>";
+					$HandsomeHelperHtml .= "<li><b>" . $seriesContent['title'] . "</b>【当前文章】</li>";
 				} else {
-					$seriesIndexHtml .= "<li><a href='" . $url . "'  title='" . $seriesContent['title'] . "'>" . $seriesContent['title'] . "</a></li>";
+					$HandsomeHelperHtml .= "<li><a href='" . $url . "'  title='" . $seriesContent['title'] . "'>" . $seriesContent['title'] . "</a></li>";
 				}
 			}
-			$seriesIndexHtml .= "</ul>";
-			$seriesIndexHtml .= "</div>";
+			$HandsomeHelperHtml .= "</ul>";
+			$HandsomeHelperHtml .= "</div>";
 
 			// 在最后添加系列目录（也可允许替换 <!-- series-index --> )
 
 			// 文章末尾添加模式
-			return $html . $seriesIndexHtml;
+			return $html . $HandsomeHelperHtml;
 
 			// 替换 <!-- series-index --> 模式
-			//return preg_replace( self::$pattern, '<div class="index-menu">' . $seriesIndexHtml . '</div>', $html );
+			//return preg_replace( self::$pattern, '<div class="index-menu">' . $HandsomeHelperHtml . '</div>', $html );
 		} else {
 
 			// slug不符合规则，不做任何处理
