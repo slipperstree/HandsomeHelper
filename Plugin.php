@@ -164,7 +164,7 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
 		} else {
 
 			// slug不符合规则，不做任何处理
-			return $html;
+			return $html . "";
 		}
 	}
 
