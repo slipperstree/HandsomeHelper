@@ -42,13 +42,6 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
     public static $themeOptions = NULL;
 
     /**
-	 * 索引ID
-	 */
-	public static $id = 1;
-	
-	public static $pattern = '/(&lt;|<)!--\s*series-index\s*--(&gt;|>)/i';
-
-    /**
      * 激活插件方法,如果激活失败,直接抛出异常
      * 
      * @access public
@@ -57,9 +50,16 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      */
     public static function activate()
     {
-        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('HandsomeHelper_Plugin', 'contentEx');
+        //主题渲染后将URL替换掉（包含首页，归档页，正文页等）
+        Typecho_Plugin::factory('Widget_Archive')->afterRender = array('HandsomeHelper_Plugin', 'afterRenderArchive');
+
+        //正文页(渲染后显示前做替换)
+        //Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('HandsomeHelper_Plugin', 'contentEx');
+
+        //首页(主题渲染前将内容改掉即可)
+        //Typecho_Plugin::factory('Widget_Archive')->beforeRender = array('HandsomeHelper_Plugin', 'beforeRenderArchive');
+
         self::$themeOptions = Helper::options();
-        //Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('HandsomeHelper_Plugin', 'excerptEx');
     }
     
     /**
@@ -90,8 +90,83 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      */
     public static function personalConfig(Typecho_Widget_Helper_Form $form){}
 
+    public static function afterRenderArchive($archive)
+    {
+        // 首先取得渲染后得到的缓冲区所有内容并阻止缓冲区输出到页面
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        $options = Helper::options();
+        if ($options->cdn_add == ""){
+            echo $html;
+            return;
+        } else{
+            // 获取用户设置的CDN加速域名(在handsome后台设置)
+            $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
+            $html = preg_replace( '/(href="|src="|url\()([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif|\.zip|\.mp4|\.mp3)(["|\)])/i', '$1' . $cdnUrl . '$2$3$4"', $html );
+
+            echo $html;
+        }
+    }
+
+    // 本意是在页面渲染之前修改掉设置项里的头图URL供后面的主题渲染，但实际测试行不通，即使修改掉了也会重新赋值，目前没有解决
+    // 本钩子函数暂时保留(未使用)
+    public static function beforeRenderArchive($archive)
+    {
+        $options = Helper::options();
+        if ($options->cdn_add == ""){
+            return;
+        }
+        
+        // 获取用户设置的CDN加速域名(在handsome后台设置)
+        $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
+
+        // 当前ArchiveWidgte指向的是列表的最后一项，需要在这里做循环处理，用next方法可依次从上到下取得列表文章的archive对象
+        // 注意next一旦调用指针就会后移一个，为了不影响后面的主题渲染最后需要将指针还原（指向最后一个即可？？）
+        while ($archive->next()) {
+            $thmS = trim($archive->fields->thumbSmall);   // 小头图地址
+            $thmB = trim($archive->fields->thumb);        // 大头图地址
+
+            // 如果头图地址以h(ttp(s)://)开头，表示使用了绝对URL，不做处理
+            // 否则在前面加上CDN加速域名
+            if ($thmS != "" && $thmS[0]!='h') {
+                $archive->fields->thumbSmall = $cdnUrl . $thmS;
+            }
+            if ($thmB != "" && $thmB[0]!='h') {
+                $archive->fields->thumb = $cdnUrl . $thmB;
+                $archive->fields->thumb = $cdnUrl . $thmB;
+                $archive->fields->thumb = $cdnUrl . $thmB;
+            }
+        }
+        
+        // url(/usr/uploads/2021/04/4208328511.png) 替换成 url([cdn_add]/usr/uploads/2021/04/4208328511.png)
+        //echo "111" . $html;
+        //var_export($archive->stack[0]);
+        //var_export(preg_replace( '/(url\()([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif)\)/i', '$1' . $cdnUrl . '$2$3"', $html ));
+    }
+
     /**
-     * 获取指定文章的自定义field设置内容
+     * 内容页替换图片相对URL为CDN域名的URL（跟afterRenderArchive功能重复，内容保留但没有调用）
+     * 
+     * @access public
+     * @return string
+     */
+    public static function contentEx( $html, $widget ) {
+        
+        $options = Helper::options();
+        if ($options->cdn_add == ""){
+            return $html;
+        }
+
+        $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
+        // src="/usr/uploads/2021/04/4208328511.png" 替换成 src="[cdn_add]/usr/uploads/2021/04/4208328511.png"
+        $html = preg_replace( '/(href="|src=")([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif)"/i', '$1' . $cdnUrl . '$2$3"', $html );
+        return $html;
+        
+	}
+
+    /**
+     * 获取指定文章的自定义field设置内容（未使用）
      * 
      * @access public
      * @param $cid 文章cid
@@ -112,121 +187,5 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
             }
         }
         return $values;
-    }
-
-    /**
-     * 列表页忽略目录生成标记
-     * 
-     * @access public
-     * @return string
-     */
-    public static function excerptEx( $html, $widget, $lastResult){
-        return preg_replace(self::$pattern,'',$html);
-    }
-
-    /**
-     * 内容页构造索引目录
-     * 
-     * @access public
-     * @return string
-     */
-    public static function contentEx( $html, $widget, $lastResult ) {
-        $html = empty( $lastResult ) ? $html : $lastResult;
-
-		// 文章标题：$widget->title  形如：开源代码分析学习 - 有趣的聊天机器人 - 01
-		// 文章链接：$widget->permalink  形如：http://blog.mangolovecarrot.net/2020/07/01/chatbot01/
-		// 文章slug：$widget->slug  形如：chatbot01
-
-		// 先取slug末尾的数字（不论几位都可以）
-		$slug = $widget->slug;
-		$slugLastDigitCnt = 0;
-		while ($slugLastDigitCnt < strlen($slug) && is_numeric(substr($slug, strlen($slug)-($slugLastDigitCnt+1)))) {
-			$slugLastDigitCnt++;
-		}
-
-		if ($slugLastDigitCnt > 0 && $slugLastDigitCnt < strlen($slug)) {
-			// slug末尾有数字，并且不全为数字的话就假定除了数字的部分的前缀是系列的slug前缀
-			// 将slug前缀作为检索条件在contents表中查询同一个系列的文章（标题? 内容?里面第一个# 或 ## 或 ###的文字）
-			$slugPrefix = substr($slug, 0, strlen($slug)-$slugLastDigitCnt);
-
-			$db = Typecho_Db::get();
-
-			$seriesContents = $db->fetchAll($db
-            ->select()->from('table.contents')
-			->where('table.contents.slug like ?', $slugPrefix . '%')
-			->where('table.contents.type = ?', 'post')
-			->order('table.contents.slug', Typecho_Db::SORT_ASC));
-
-			// 如果只有一篇，表示除了当前这篇文章以外没有相同slug前缀的文章，不生成系列文章
-			if (count($seriesContents) <= 1) {
-				return $html;
-			}
-			
-			$HandsomeHelperHtml = "<div style='padding-left:10px; padding-top:10px; padding-bottom:10px; border:0px solid blue; background:#EDEFED; border-left:3px solid #D2D7D2;'>";
-			//$HandsomeHelperHtml = "<div style='border:0px solid blue;background:#EDEFED;'>";
-			$HandsomeHelperHtml .= "<h3>系列文章</h3>";
-			$HandsomeHelperHtml .= "<ul>";
-			foreach ($seriesContents as $seriesContent) {
-				// TODO 取到以后拼接出url，并用上面取出的文字作为链接文字
-				$url = self::getURL($seriesContent, $widget);
-				//$url = "#";
-
-				if ($seriesContent['slug'] == $slug) {
-					// 当前文章不加link
-					$HandsomeHelperHtml .= "<li><b>" . $seriesContent['title'] . "</b>【当前文章】</li>";
-				} else {
-					$HandsomeHelperHtml .= "<li><a href='" . $url . "'  title='" . $seriesContent['title'] . "'>" . $seriesContent['title'] . "</a></li>";
-				}
-			}
-			$HandsomeHelperHtml .= "</ul>";
-			$HandsomeHelperHtml .= "</div>";
-
-			// 在最后添加系列目录（也可允许替换 <!-- series-index --> )
-
-			// 文章末尾添加模式
-			return $html . $HandsomeHelperHtml;
-
-			// 替换 <!-- series-index --> 模式
-			//return preg_replace( self::$pattern, '<div class="index-menu">' . $HandsomeHelperHtml . '</div>', $html );
-		} else {
-
-			// slug不符合规则，不做任何处理
-			return $html . "";
-		}
-	}
-
-	public static function getURL($dbContentRow, $widget) {
-		$value = array();
-		//return "#";
-		$value['date'] = new Typecho_Date($dbContentRow['created']);
-
-        /** 生成日期 */
-        $value['year'] = $value['date']->year;
-        $value['month'] = $value['date']->month;
-		$value['day'] = $value['date']->day;
-		$value['slug'] = urlencode($dbContentRow['slug']);
-		$value['category'] = urlencode($dbContentRow['category']);
-		
-		$pathinfo = Typecho_Router::url("post", $value);
-		return Typecho_Common::url($pathinfo, $widget->options->index);
-	}
-	
-	// 获取系列文章列表
-	protected function getSeriesList($column, $offset, $type, $status = NULL, $authorId = 0, $pageSize = 20)
-    {
-        $select = $this->db->select(array('COUNT(table.contents.cid)' => 'num'))->from('table.contents')
-        ->where("table.contents.{$column} > {$offset}")
-        ->where("table.contents.type = ?", $type);
-
-        if (!empty($status)) {
-            $select->where("table.contents.status = ?", $status);
-        }
-
-        if ($authorId > 0) {
-            $select->where('table.contents.authorId = ?', $authorId);
-        }
-
-        $count = $this->db->fetchObject($select)->num + 1;
-        return ceil($count / $pageSize);
     }
 }
