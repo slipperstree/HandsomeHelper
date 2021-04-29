@@ -240,7 +240,7 @@ EOF;
         } else{
             // 获取用户设置的CDN加速域名(在handsome后台设置)
             $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
-            $html = preg_replace( '/(href="|src="|url\()([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif|\.svg|\.c|\.py|\.zip|\.mp4|\.mp3)(["|\)])/i', '$1' . $cdnUrl . '$2$3$4"', $html );
+            $html = preg_replace( '/(href="|src="|url\()([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif|\.svg|\.c|\.py|\.zip|\.pdf|\.mp4|\.mp3)(["|\)])/i', '$1' . $cdnUrl . '$2$3$4"', $html );
 
             echo $html;
         }
