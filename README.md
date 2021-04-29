@@ -12,7 +12,7 @@ Typecho 开源博客的插件。用于辅助Handsome主题实现一些主题没�
 - http://blog.mangolovecarrot.net/
 
 ## 安装
-- 下载后得到文件夹【HandsomeHelper】（如果你得到的是【HandsomeHelper-master】那么请去掉后面的【-master】）
+- 下载后得到文件夹【HandsomeHelper】（如果你得到的是【HandsomeHelper-master】或【HandsomeHelper-1.0.0】那么请自行修改为【HandsomeHelper】）
 - 将这个文件夹上传到Typecho的usr/plugins/ 下
 - 博客后台插件管理页面，启用HandsomeHelper插件即可。
 
