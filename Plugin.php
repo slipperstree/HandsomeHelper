@@ -149,7 +149,7 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
                     <div class="headerBoxText"><span class="dash">---------------------- </span>开发用测试环境<span class="dash"> ----------------------</span></div>
                 </div>
                 <!-- 开发测试用环境醒目 -->
-            EOF;
+EOF;
         }
     }
 
@@ -214,7 +214,7 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
                 </style>
                 <div class="headerBox"><span class="dash">-------------------- </span>开发用测试环境<span class="dash"> --------------------</span></div>
                 <!-- 开发测试用环境醒目 -->
-            EOF;
+EOF;
         }
     }
     
