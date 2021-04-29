@@ -53,6 +53,11 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
         //主题渲染后将URL替换掉（包含首页，归档页，正文页等）
         Typecho_Plugin::factory('Widget_Archive')->afterRender = array('HandsomeHelper_Plugin', 'afterRenderArchive');
 
+        //后台管理header
+        Typecho_Plugin::factory('admin/menu.php')->navBar = array('HandsomeHelper_Plugin', 'navBarAdminHeaderMenu');
+        //前台header
+        Typecho_Plugin::factory('Widget_Archive')->header = array('HandsomeHelper_Plugin', 'headerArchive');
+
         //正文页(渲染后显示前做替换)
         //Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('HandsomeHelper_Plugin', 'contentEx');
 
@@ -80,6 +85,138 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config(Typecho_Widget_Helper_Form $form) {}
+
+    // Debug打开时，后台管理闪烁提示
+    public static function navBarAdminHeaderMenu()
+    {
+        if (defined('__TYPECHO_DEBUG__') && __TYPECHO_DEBUG__) {
+            echo<<<EOF
+                <!-- 开发测试用环境醒目 -->
+                <style>
+                    @keyframes fade {
+                        from {
+                            opacity: 1.0;
+                        }
+                        50% {
+                            opacity: 0.4;
+                        }
+                        to {
+                            opacity: 1.0;
+                        }
+                    }
+
+                    @-webkit-keyframes fade {
+                        from {
+                            opacity: 1.0;
+                        }
+                        50% {
+                            opacity: 0.4;
+                        }
+                        to {
+                            opacity: 1.0;
+                        }
+                    }
+                    .headerBox {
+                        display: block;
+                        position:fixed;
+                        background-color: black;
+                        right:5px;
+                        top:5vh;
+                    }
+                    .headerBoxText {
+                        color: yellow;
+                        padding: 5px 30px;
+                        padding-top: 3px;
+                        font-size: x-large;
+                        animation: fade 600ms infinite;
+                        -webkit-animation: fade 600ms infinite;
+                        white-space: nowrap;
+                        font-family: "Source Sans Pro","Hiragino Sans GB","Microsoft Yahei",SimSun,Helvetica,Arial,Sans-serif,monospace;
+                    }
+                    @media screen and (max-width: 1024px) {
+                        .headerBox {
+                            top:12vh;
+                        }
+                        .headerBoxText {
+                            font-size: 20px;
+                        }
+                        .dash {
+                            display: none;
+                        }
+                    }
+                </style>
+                <div class="headerBox">
+                    <div class="headerBoxText"><span class="dash">---------------------- </span>开发用测试环境<span class="dash"> ----------------------</span></div>
+                </div>
+                <!-- 开发测试用环境醒目 -->
+            EOF;
+        }
+    }
+
+    // Debug打开时，前台页面闪烁提示
+    public static function headerArchive($header, $archive)
+    {
+        if (defined('__TYPECHO_DEBUG__') && __TYPECHO_DEBUG__) {
+            echo<<<EOF
+                <!-- 开发测试用环境醒目 -->
+                <style>
+                    @keyframes fade {
+                        from {
+                            opacity: 1.0;
+                        }
+                        50% {
+                            opacity: 0.4;
+                        }
+                        to {
+                            opacity: 1.0;
+                        }
+                    }
+
+                    @-webkit-keyframes fade {
+                        from {
+                            opacity: 1.0;
+                        }
+                        50% {
+                            opacity: 0.4;
+                        }
+                        to {
+                            opacity: 1.0;
+                        }
+                    }
+                    .headerBox {
+                        display: block;
+                        position:fixed;
+                        color: yellow;
+                        z-index:99999;
+                        padding: 10px;
+                        animation: fade 600ms infinite;
+                        -webkit-animation: fade 600ms infinite;
+                        white-space: nowrap;
+
+                        font-size: xx-large;
+                        top:-6px;
+                        right:220px;
+                    }
+                    @media screen and (max-width: 1024px) {
+                        .headerBox {
+                            font-size: 27px;
+                            top:-5px;
+                            right: unset;
+                            left: 22%;
+                        }
+                        .dash {
+                            display: none;
+                        }
+                        .navbar-brand img {
+                            display: none !important;
+                        }
+                    }
+                </style>
+                <div class="headerBox"><span class="dash">-------------------- </span>开发用测试环境<span class="dash"> --------------------</span></div>
+                <!-- 开发测试用环境醒目 -->
+            EOF;
+        }
+    }
     
     /**
      * 个人用户的配置面板
