@@ -33,7 +33,7 @@
  * <script src="//cdn.jsdelivr.net/npm/mdui@1.0.1/dist/js/mdui.min.js"></script>
  * @package Handsome Helper
  * @author mango
- * @version 0.1.0
+ * @version 1.0.0
  * @link https://github.com/slipperstree/HandsomeHelper
  */
 
