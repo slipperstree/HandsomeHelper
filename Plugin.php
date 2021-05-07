@@ -58,6 +58,12 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
         //前台header
         Typecho_Plugin::factory('Widget_Archive')->header = array('HandsomeHelper_Plugin', 'headerArchive');
 
+        //后台新建文章编辑器
+        Typecho_Plugin::factory('admin/write-post.php')->richEditor = array('HandsomeHelper_Plugin', 'Editor');
+        Typecho_Plugin::factory('admin/write-page.php')->richEditor = array('HandsomeHelper_Plugin', 'Editor');
+        Typecho_Plugin::factory('admin/write-post.php')->bottom = array('HandsomeHelper_Plugin', 'EditorEnd');
+        
+
         //正文页(渲染后显示前做替换)
         //Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('HandsomeHelper_Plugin', 'contentEx');
 
@@ -84,7 +90,14 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      * @param Typecho_Widget_Helper_Form $form 配置面板
      * @return void
      */
-    public static function config(Typecho_Widget_Helper_Form $form) {}
+    public static function config(Typecho_Widget_Helper_Form $form) {
+        $emoji = new Typecho_Widget_Helper_Form_Element_Radio('cdn_from_handsome',
+            array(
+                '1' => '使用handsome主题内的设置(' . Helper::options()->cdn_add . ')',
+                '0' => '使用本插件的设置(TODO)',
+            ),'1', _t('CDN设置'), _t('可以强制使用本插件的CDN域名。'));
+        $form->addInput($emoji);
+    }
 
     // Debug打开时，后台管理闪烁提示
     public static function navBarAdminHeaderMenu()
@@ -240,7 +253,20 @@ EOF;
         } else{
             // 获取用户设置的CDN加速域名(在handsome后台设置)
             $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
-            $html = preg_replace( '/(href="|src="|url\()([^h][\/\\w\-_]*)(\.jpg|\.png|\.gif|\.svg|\.c|\.py|\.zip|\.pdf|\.mp4|\.mp3)(["|\)])/i', '$1' . $cdnUrl . '$2$3$4"', $html );
+            
+            $fileExtends='\.jpg|\.png|\.gif|\.svg|\.c|\.py|\.zip|\.pdf|\.mp4|\.mp3';
+
+            // 替换所有以siteUrl开头的资源文件$options->siteUrl
+            // TODO siteUrl尾部如果不带/则强制加上
+            // TODO $options->siteUrl 中的/要换成\/吗？
+            
+            $siteUrlForRegx = str_replace("/","\\/", $options->siteUrl);
+            $regxs='/(href="|src="|url\()(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
+            $html = preg_replace( $regxs, '$1' . $cdnUrl . '/$3$4$5', $html );
+            
+            // 替换所有使用相对路径的地方
+            $regxs='/(href="|src="|url\()([^h][\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
+            $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3$4', $html );
 
             echo $html;
         }
@@ -325,4 +351,27 @@ EOF;
         }
         return $values;
     }
+
+    /**
+     * 插入编辑器
+     */
+    public static function Editor($post)
+    {
+    }
+
+    public static function EditorEnd($post)
+    {
+        ?>
+        <script>
+        $(document).ready(function() {
+            var btnRow = $("#wmd-code-button");
+            btnRow.after('<li class="wmd-button" id="wmd-dplayer-button" style="" title="测试"><img width="20px" src="/usr/plugins/HandsomeHelper/assets/icons/codeblock.png"></li>');
+            //debugger
+            //alert($("#wmd-album-button"));
+        });
+        </script>
+        <?php
+    }
+
+    
 }
