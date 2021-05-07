@@ -16,4 +16,4 @@ Typecho 开源博客的插件。用于辅助Handsome主题实现一些主题没�
 - 将这个文件夹上传到Typecho的usr/plugins/ 下
 - 博客后台插件管理页面，启用HandsomeHelper插件即可。
 
-## Enjoy it!!!
+## Enjoy it!
