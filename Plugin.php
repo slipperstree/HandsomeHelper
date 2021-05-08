@@ -277,15 +277,14 @@ EOF;
 
             // 替换所有以siteUrl开头的资源文件$options->siteUrl
             // TODO siteUrl尾部如果不带/则强制加上
-            // TODO $options->siteUrl 中的/要换成\/吗？
-            
             $siteUrlForRegx = str_replace("/","\\/", $options->siteUrl);
-            $regxs='/(href="|src="|url\()(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
+            $regxs='/(href="|src="|url\(|window.open\(")(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '/$3$4$5', $html );
             
             // 替换所有使用相对路径的地方
-            $regxs='/(href="|src="|url\()([^h][\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
-            $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3$4', $html );
+            // TODO 如果handsome设置了图片的压缩格式，需要添加在末尾
+            $regxs='/(href="|src="|url\(|window.open\(")([^h][\/\\w\-_]*)(' . $fileExtends . ')/i';
+            $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3', $html );
         }
 
         echo $html;
