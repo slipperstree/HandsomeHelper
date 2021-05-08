@@ -20,7 +20,8 @@
  *          本插件非handsome官方插件，请自行承担使用风险。<br>
  *          作者：<a href="http://blog.mangolovecarrot.net">芒果爱吃胡萝卜</a><br><br>
  *          主要功能<br>
- *          1. 如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。<br><br>
+ *          1. 如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。<br>
+ *          2. 可以为代码块添加行号显示，可以为代码块添加一个复制按钮。<br><br>
  *          有任何问题或建议欢迎去主页留言或点击GITHUB按钮在Github上发起issue。<br>
  *      <div class="mdui-dialog-actions">
  *          <button class="mdui-btn mdui-ripple" mdui-dialog-close>我知道了</button>

@@ -4,6 +4,7 @@ Typecho 开源博客的插件。用于辅助Handsome主题实现一些主题没�
 
 ## 功能
 1. 如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。
+2. 可以为代码块添加行号显示，可以为代码块添加一个复制按钮。
 
 ## 适用Handsome主题版本(其他版本未测试)
 - 7.x
