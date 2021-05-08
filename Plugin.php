@@ -270,6 +270,124 @@ EOF;
 
             echo $html;
         }
+
+        // 为代码高亮加行号
+        $optCodeShowLine = true;
+        if($optCodeShowLine){
+            ?>
+                <script>
+                    $(document).ready(function() {
+                        $('pre code').each(function(){
+                        var lines = $(this).text().split('\n').length - 1;
+                        var $numbering = $('<ul/>').addClass('pre-numbering hljs');
+                        $(this)
+                            .addClass('has-numbering')
+                            .parent()
+                            .append($numbering);
+                        for(i=1;i<=lines;i++){
+                            $numbering.append($('<li/>').text(i));
+                        }
+                        });
+                    });
+                </script>
+                <style>
+                    pre {
+                        position: relative;
+                        margin-bottom: 24px;
+                        border-radius: 3px;
+                        border: 1px solid #C3CCD0;
+                        background: #FFF;
+                        overflow: hidden;
+                        }
+                    code {
+                        display: block;
+                        padding: 12px 24px;
+                        overflow-y: auto;
+                        font-weight: 300;
+                        font-family: Menlo, monospace;
+                        font-size: 0.8em;
+                        }
+                    code.has-numbering {
+                        padding-left: 60px !important;
+                    }
+                    .pre-numbering {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 50px;
+                        /* padding: 12px 2px 12px 0; */
+                        border-right: 1px solid #C3CCD0;
+                        /* border-right: 1px solid #6ce26c; */
+                        /* border-radius: 3px 0 0 3px; */
+                        background-color: rgba(0, 0, 0, 0);
+                        text-align: right;
+                        margin: 0px !important;
+                    }
+                    .pre-numbering li {
+                        list-style-type:none;
+                        text-align:right;
+                    }
+                </style>
+            <?php
+        }
+
+        // 为代码高亮添加一个复制按钮
+        $optCodeAllowCopy = true;
+        if($optCodeAllowCopy){
+            ?>
+                <!-- https://github.com/zenorocha/clipboard.js -->
+                <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+                <script>
+                    $(document).ready(function() {
+                        var pres = $("pre");
+                        if (pres.length) {
+                            pres.each(function() {
+                                var t = $(this).children("code").text();
+                                var btn = $('<span class="copy">复制代码</span>').attr("data-clipboard-text",t);
+                                $(this).prepend(btn);
+                                var c = new ClipboardJS(btn[0]);
+                                c.on("success", function() {
+                                    btn.addClass("copyed").text("复制成功");
+                                });
+                                c.on("error", function() {
+                                    btn.text("复制失败");
+                                });
+                                btn.mouseleave(function() {
+                                    btn.text("复制代码").removeClass("copyed");
+                                });
+                            });
+                        }
+                    });
+                </script>
+                <style>
+                    /*添加按钮*/
+                    pre  {
+                        position: relative;
+                    }
+                    pre > span {
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        width: 20%;
+                        border-radius: 2px;
+                        text-align: center;
+                        padding: 0 10px;
+                        font-size: 14px;
+                        background: rgba(100, 100, 100, 0.6);
+                        color: #fff;
+                        cursor: pointer;
+                        display:none;
+                        z-index: 999;
+                    }
+                    pre:hover > span {
+                        display:block;
+                    }
+                    pre > .copyed {
+                        background: #67c23a;
+                    }
+                </style>
+            <?php
+        }
     }
 
     // 本意是在页面渲染之前修改掉设置项里的头图URL供后面的主题渲染，但实际测试行不通，即使修改掉了也会重新赋值，目前没有解决
