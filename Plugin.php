@@ -105,9 +105,16 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
             ),
             array('EnableCodeShowLine', 'EnableCodeAllowCopy'),
             _t('代码块增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，可能会有冲突，请关闭本设置。'));
+        $image = new Typecho_Widget_Helper_Form_Element_Checkbox('image',
+            array(
+                'IsImageLeft' => '文章图片居左显示（handsome主题默认是居中显示，但PC端图片和文字有割裂感，特别是小图片的时候比较突兀）'
+            ),
+            array(''),
+            _t('图片增强设置'), _t(''));
         
         $form->addInput($cdn);
         $form->addInput($codeBlock);
+        $form->addInput($image);
     }
 
     // Debug打开时，后台管理闪烁提示
@@ -415,6 +422,29 @@ EOF;
             <?php
         }
         // 代码块增强设置 -------------------------------------------------------- E
+
+        // 图片增强设置 ---------------------------------------------------------- S
+        $optImage = $myOptions->image;
+        $isImageLeft = false;
+        foreach($optImage as $item){
+            if ($item === "IsImageLeft") $isImageLeft = true;
+        }
+
+        // 图片强制居左显示
+        if ($isImageLeft) {
+            ?>
+            <style>
+                #post-content img {
+                    margin: 10px 0px;
+                }
+
+                figcaption.post-img-figcaption {
+                    text-align: left;
+                }
+            </style>
+            <?php
+        }
+        // 图片增强设置 ---------------------------------------------------------- E
     }
 
     // 本意是在页面渲染之前修改掉设置项里的头图URL供后面的主题渲染，但实际测试行不通，即使修改掉了也会重新赋值，目前没有解决
