@@ -92,12 +92,22 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config(Typecho_Widget_Helper_Form $form) {
-        $emoji = new Typecho_Widget_Helper_Form_Element_Radio('cdn_from_handsome',
+        $cdn = new Typecho_Widget_Helper_Form_Element_Checkbox('cdn',
             array(
-                '1' => '使用handsome主题内的设置(' . Helper::options()->cdn_add . ')',
-                '0' => '使用本插件的设置(TODO)',
-            ),'1', _t('CDN设置'), _t('可以强制使用本插件的CDN域名。'));
-        $form->addInput($emoji);
+                'EnableCDN4RelativePath' => '为相对路径的资源添加CDN域名(当前handsome主题的CDN设置：「' . Helper::options()->cdn_add . '」)'
+            ),
+            array(''),
+            _t('CDN增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，本设置将失效。'));
+        $codeBlock = new Typecho_Widget_Helper_Form_Element_Checkbox('codeBlock',
+            array(
+                'EnableCodeShowLine' => '显示行号',
+                'EnableCodeAllowCopy' => '添加复制按钮'
+            ),
+            array('EnableCodeShowLine', 'EnableCodeAllowCopy'),
+            _t('代码块增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，请关闭本设置，可能会有冲突。'));
+        
+        $form->addInput($cdn);
+        $form->addInput($codeBlock);
     }
 
     // Debug打开时，后台管理闪烁提示
@@ -248,12 +258,20 @@ EOF;
         ob_end_clean();
 
         $options = Helper::options();
-        if ($options->cdn_add == ""){
-            echo $html;
-            return;
-        } else{
+        $myOptions = $options->plugin('HandsomeHelper');
+
+        // CDN增强设置 --------------------------------------------------------- S
+        $optCDN = $myOptions->cdn;
+        $enableCDN4RelativePath = false;
+        foreach($optCDN as $item){
+            if ($item === "EnableCDN4RelativePath") $enableCDN4RelativePath = true;
+        }
+
+        // 为相对路径的资源添加CDN域名
+        $cdn_add = $options->cdn_add;
+        if ($enableCDN4RelativePath && $cdn_add != ""){
             // 获取用户设置的CDN加速域名(在handsome后台设置)
-            $cdnUrl = trim(explode("|",Helper::options()->cdn_add)[0]);
+            $cdnUrl = trim(explode("|",$cdn_add)[0]);
             
             $fileExtends='\.jpg|\.png|\.gif|\.svg|\.c|\.py|\.zip|\.pdf|\.mp4|\.mp3';
 
@@ -268,13 +286,22 @@ EOF;
             // 替换所有使用相对路径的地方
             $regxs='/(href="|src="|url\()([^h][\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3$4', $html );
-
-            echo $html;
         }
 
+        echo $html;
+        // CDN增强设置 --------------------------------------------------------- E
+
+        // 代码块增强设置 -------------------------------------------------------- S
+        $optCodeBlock = $myOptions->codeBlock;
+        $enableCodeShowLine = false;
+        $enableCodeAllowCopy = false;
+        foreach($optCodeBlock as $item){
+            if ($item === "EnableCodeShowLine") $enableCodeShowLine = true;
+            if ($item === "EnableCodeAllowCopy") $enableCodeAllowCopy = true;
+        }
+        
         // 为代码高亮加行号
-        $optCodeShowLine = true;
-        if($optCodeShowLine){
+        if($enableCodeShowLine){
             ?>
                 <script>
                     $(document).ready(function() {
@@ -333,8 +360,7 @@ EOF;
         }
 
         // 为代码高亮添加一个复制按钮
-        $optCodeAllowCopy = true;
-        if($optCodeAllowCopy){
+        if($enableCodeAllowCopy){
             ?>
                 <!-- https://github.com/zenorocha/clipboard.js -->
                 <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
@@ -389,6 +415,7 @@ EOF;
                 </style>
             <?php
         }
+        // 代码块增强设置 -------------------------------------------------------- E
     }
 
     // 本意是在页面渲染之前修改掉设置项里的头图URL供后面的主题渲染，但实际测试行不通，即使修改掉了也会重新赋值，目前没有解决
