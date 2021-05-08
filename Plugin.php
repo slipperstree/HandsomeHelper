@@ -104,7 +104,7 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
                 'EnableCodeAllowCopy' => '添加复制按钮'
             ),
             array('EnableCodeShowLine', 'EnableCodeAllowCopy'),
-            _t('代码块增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，请关闭本设置，可能会有冲突。'));
+            _t('代码块增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，可能会有冲突，请关闭本设置。'));
         
         $form->addInput($cdn);
         $form->addInput($codeBlock);
