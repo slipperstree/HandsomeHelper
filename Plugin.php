@@ -93,12 +93,26 @@ class HandsomeHelper_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config(Typecho_Widget_Helper_Form $form) {
-        $cdn = new Typecho_Widget_Helper_Form_Element_Checkbox('cdn',
+
+        if (Helper::options()->cdn_add != "") {
+            $handsomeCDN = '<font color="blue">' . trim(explode("|",Helper::options()->cdn_add)[0]) . '</font>';
+            $handsomeImagePostSuffix = '<font color="green">' . Helper::options()->imagePostSuffix . '</font>';
+            $cdn = new Typecho_Widget_Helper_Form_Element_Checkbox('cdn',
             array(
-                'EnableCDN4RelativePath' => '为相对路径的资源添加CDN域名(当前handsome主题的CDN设置：「' . Helper::options()->cdn_add . '」)'
+                'EnableCDN4RelativePath' => '为相对路径的资源添加CDN域名和图片后缀<url><li>　　　当前handsome主题设置的CDN「' . $handsomeCDN . '」</li><li>　　　当前handsome主题设置的图片后缀「' . $handsomeImagePostSuffix . '」</li><li>　　　例</li><li>　　　启用前「src="/usr/upload/abc.jpg"」</li><li>　　　启用后「src="' . $handsomeCDN . '/usr/upload/abc.jpg?' . $handsomeImagePostSuffix . '"」</li>'
             ),
             array(''),
             _t('CDN增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，本设置将失效。'));
+            
+        } else {
+            $cdn = new Typecho_Widget_Helper_Form_Element_Checkbox('cdn',
+            array(
+                'EnableCDN4RelativePath' => '为相对路径的资源添加CDN域名和图片后缀<url><li>　　　<font color=red>当前handsome主题没有设置CDN(本地图片云存储(镜像)加速)，本设置无效。</font></li><li>　　　启用效果例</li><li>　　　启用前「src="/usr/upload/abc.jpg"」</li><li>　　　启用后「src="http://CDN域名/usr/upload/abc.jpg?图片压缩后缀"」</li>'
+            ),
+            array(''),
+            _t('CDN增强设置'), _t('如果启用了handsome插件的「前台引入vditor.js接管前台解析」功能，本设置将失效。'));
+        }
+        
         $codeBlock = new Typecho_Widget_Helper_Form_Element_Checkbox('codeBlock',
             array(
                 'EnableCodeShowLine' => '显示行号',
@@ -275,8 +289,9 @@ EOF;
             if ($item === "EnableCDN4RelativePath") $enableCDN4RelativePath = true;
         }
 
-        // 为相对路径的资源添加CDN域名
+        // 为相对路径的资源添加CDN域名和自定义后缀（多用于压缩）
         $cdn_add = $options->cdn_add;
+        $imagePostSuffix = $options->imagePostSuffix;
         if ($enableCDN4RelativePath && $cdn_add != ""){
             // 获取用户设置的CDN加速域名(在handsome后台设置)
             $cdnUrl = trim(explode("|",$cdn_add)[0]);
@@ -286,13 +301,19 @@ EOF;
             // 替换所有以siteUrl开头的资源文件$options->siteUrl
             // TODO siteUrl尾部如果不带/则强制加上
             $siteUrlForRegx = str_replace("/","\\/", $options->siteUrl);
-            $regxs='/(href="|src="|url\(|window.open\(")(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
+            $regxs='/(href="|src="|url\([\']|window.open\(")(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '/$3$4$5', $html );
             
             // 替换所有使用相对路径的地方
-            // TODO 如果handsome设置了图片的压缩格式，需要添加在末尾
-            $regxs='/(href="|src="|url\(|window.open\(")([^h][\/\\w\-_]*)(' . $fileExtends . ')/i';
+            $regxs='/(href="|src="|url\([\']|window.open\(")([^h][\/\\w\-_]*)(' . $fileExtends . ')/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3', $html );
+
+            // 如果定义了图片后缀再加上后缀（多用于压缩）
+            if ($imagePostSuffix != "") {
+                $imageExtends='\.jpg|\.png|\.gif|\.svg';
+                $regxs='/(href="|src="|url\([\']|window.open\(")(' . str_replace("/","\\/", $cdnUrl) . ')([\/\\w\-_]*)(' . str_replace("/","\\/", $imageExtends) . ')/i';
+                $html = preg_replace( $regxs, '$1$2/$3$4?' . $imagePostSuffix, $html );
+            }
         }
 
         echo $html;
@@ -311,8 +332,7 @@ EOF;
         if($enableCodeShowLine){
             // 获取typecho版本
             // 形如 generator = Typecho 1.1/17.10.30
-            $generator = $options->generator;
-            $typechoVersion = trim(explode("/",$generator)[0]);
+            $typechoVersion = trim(explode("/",$options->generator)[0]);
             $fixLine = "";
             // 1.0版本的换行数会比1.1版本的换行数多一行，需要减掉
             if ($typechoVersion === "Typecho 1.0") {
