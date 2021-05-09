@@ -17,11 +17,12 @@
  * <div class="mdui-dialog" id="dialog">
  *      <div class="mdui-dialog-title">关于 Handsome Helper</div>
  *      <div class="mdui-dialog-content">
- *          本插件非handsome官方插件，请自行承担使用风险。<br>
+ *          本插件主要是为了自己方便而写，非handsome官方插件，请自行承担使用风险。<br>
  *          作者：<a href="http://blog.mangolovecarrot.net">芒果爱吃胡萝卜</a><br><br>
  *          主要功能<br>
- *          1. 如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。<br>
- *          2. 可以为代码块添加行号显示，可以为代码块添加一个复制按钮。<br><br>
+ *          1. CDN相关。如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。<br>
+ *          2. 代码块增强。可以为代码块添加行号显示，添加复制功能等。<br>
+ *          3. 图片显示增强。文章图片强制居左等。<br><br>
  *          有任何问题或建议欢迎去主页留言或点击GITHUB按钮在Github上发起issue。<br>
  *      <div class="mdui-dialog-actions">
  *          <button class="mdui-btn mdui-ripple" mdui-dialog-close>我知道了</button>
