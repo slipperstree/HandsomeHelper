@@ -313,7 +313,7 @@ EOF;
                 <script>
                     $(document).ready(function() {
                         $('pre code').each(function(){
-                        var lines = $(this).text().split('\n').length - 1;
+                        var lines = $(this).text().split('\n').length;
                         var $numbering = $('<ul/>').addClass('pre-numbering hljs');
                         $(this)
                             .addClass('has-numbering')
