@@ -309,11 +309,22 @@ EOF;
         
         // 为代码高亮加行号
         if($enableCodeShowLine){
+            // 获取typecho版本
+            // 形如 generator = Typecho 1.1/17.10.30
+            $generator = $options->generator;
+            $typechoVersion = trim(explode("/",$generator)[0]);
+            $fixLine = "";
+            // 1.0版本的换行数会比1.1版本的换行数多一行，需要减掉
+            if ($typechoVersion === "Typecho 1.0") {
+                $fixLine = " - 1";
+            } elseif ($typechoVersion === "Typecho 1.1") {
+                $fixLine = "";
+            }
             ?>
                 <script>
                     $(document).ready(function() {
                         $('pre code').each(function(){
-                        var lines = $(this).text().split('\n').length;
+                        var lines = $(this).text().split('\n').length <?php echo $fixLine; ?> ;
                         var $numbering = $('<ul/>').addClass('pre-numbering hljs');
                         $(this)
                             .addClass('has-numbering')
