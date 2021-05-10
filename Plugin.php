@@ -340,18 +340,19 @@ EOF;
 
             // 替换所有以siteUrl开头的资源文件$options->siteUrl
             // TODO: siteUrl尾部如果不带/则强制加上
+            // 正则说明： url\(\'?  匹配 url(' 或者 url(  都可以（?表示可以匹配任意次但尽可能少的匹配，如果是两个问号表示匹配0到1次也是尽可能少的匹配）
             $siteUrlForRegx = str_replace("/","\\/", $options->siteUrl);
-            $regxs='/(href="|src="|url\([\']|window.open\(")(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
+            $regxs='/(href="|src="|url\(\'?|window.open\(")(' . $siteUrlForRegx . ')([\/\\w\-_]*)(' . $fileExtends . ')(["|\)])/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '/$3$4$5', $html );
             
             // 替换所有使用相对路径的地方
-            $regxs='/(href="|src="|url\([\']|window.open\(")([^h][\/\\w\-_]*)(' . $fileExtends . ')/i';
+            $regxs='/(href="|src="|url\(\'?|window.open\(")([^h][\/\\w\-_]*)(' . $fileExtends . ')/i';
             $html = preg_replace( $regxs, '$1' . $cdnUrl . '$2$3', $html );
 
             // 如果定义了图片后缀再加上后缀（多用于压缩）
             if ($imagePostSuffix != "") {
                 $imageExtends='\.jpg|\.png|\.gif|\.svg';
-                $regxs='/(href="|src="|url\([\']|window.open\(")(' . str_replace("/","\\/", $cdnUrl) . ')([\/\\w\-_]*)(' . str_replace("/","\\/", $imageExtends) . ')/i';
+                $regxs='/(href="|src="|url\(\'?|window.open\(")(' . str_replace("/","\\/", $cdnUrl) . ')([\/\\w\-_]*)(' . str_replace("/","\\/", $imageExtends) . ')/i';
                 $html = preg_replace( $regxs, '$1$2/$3$4?' . $imagePostSuffix, $html );
             }
         }
