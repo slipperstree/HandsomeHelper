@@ -3,10 +3,13 @@
 本插件非handsome官方插件，请自行承担使用风险。
 适用Handsome主题版本：7.x (其他版本未测试)
 
-## 功能
+## handsome主题增强功能
 1. CDN相关。如果开启了CDN加速，首页头图如果指定的是相对地址的URL(比如/usr/upload/.../abc.jpg)，那么会自动切换成CDN加速域名(变成http://CDN-URL/usr/upload/.../abc.jpg)。
 2. 代码块增强。可以为代码块添加行号显示，添加复制功能等。
 3. 图片显示增强。文章图片强制居左等。
+
+## 非handsome主题也可以使用的增强功能
+1. 静态首页功能（强烈推荐），定时读取当前首页内容并在网站根目录生成index.html，显著提高首页访问速度。比redis等全站缓存灵活可靠不会出现奇怪的问题。
 
 ## 例子
 - http://blog.mangolovecarrot.net/HandsomeHelper/
