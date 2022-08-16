@@ -353,7 +353,7 @@ EOF;
             if ($imagePostSuffix != "") {
                 $imageExtends='\.jpg|\.png|\.gif|\.svg';
                 $regxs='/(href="|src="|url\(\'?|window.open\(")(' . str_replace("/","\\/", $cdnUrl) . ')([\/\\w\-_]*)(' . str_replace("/","\\/", $imageExtends) . ')/i';
-                $html = preg_replace( $regxs, '$1$2/$3$4?' . $imagePostSuffix, $html );
+                $html = preg_replace( $regxs, '$1$2/$3$4' . $imagePostSuffix, $html );
             }
         }
 
