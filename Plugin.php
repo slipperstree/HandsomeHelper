@@ -407,8 +407,9 @@ EOF;
                         overflow: hidden;
                         }
                     code {
-                        display: block;
-                        padding: 12px 24px;
+                        /* 下面这两句会导致行内代码变成占用一整行的bug，去掉 */
+                        /* display: block; */
+                        /* padding: 12px 24px; */
                         overflow-y: auto;
                         font-weight: 300;
                         font-family: Menlo, monospace;
